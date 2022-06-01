@@ -5,10 +5,10 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Ingregient
+from core.models import Ingredient
 from recipe.serializers import IngredientSerializer
 
-INGREDIENT_URL = reverse('recipe:ingregient-list')
+INGREDIENT_URL = reverse('recipe:ingredient-list')
 
 class PublicIngredientApiTests(TestCase):
 
@@ -32,11 +32,11 @@ class PrivetIngredientApiTests(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_retrive_ingredient(self):
-        Ingregient.objects.create(user = self.user, name = 'Kale')
-        Ingregient.objects.create(user = self.user, name = 'Salt')
+        Ingredient.objects.create(user = self.user, name = 'Kale')
+        Ingredient.objects.create(user = self.user, name = 'Salt')
         
         res = self.client.get(INGREDIENT_URL)
-        tags = Ingregient.objects.all().order_by('-name')
+        tags = Ingredient.objects.all().order_by('-name')
         serializer = IngredientSerializer(tags, many=True)
         
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -47,8 +47,8 @@ class PrivetIngredientApiTests(TestCase):
             email = 'test1@gmail.com',
             password = 'test123'
         )
-        Ingregient.objects.create(user = user2, name = 'Biriyani')
-        tag = Ingregient.objects.create(user = self.user, name = 'Vegan')
+        Ingredient.objects.create(user = user2, name = 'Biriyani')
+        tag = Ingredient.objects.create(user = self.user, name = 'Vegan')
         res = self.client.get(INGREDIENT_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -61,7 +61,7 @@ class PrivetIngredientApiTests(TestCase):
         }
         res = self.client.post(INGREDIENT_URL, payload)
 
-        tag = Ingregient.objects.filter(user=self.user, name=payload['name']).exists()
+        tag = Ingredient.objects.filter(user=self.user, name=payload['name']).exists()
         self.assertTrue(tag)
 
     def test_create_tag_invalid(self):

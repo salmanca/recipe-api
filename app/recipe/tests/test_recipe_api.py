@@ -88,3 +88,52 @@ class PrivateRecipeApiTest(TestCase):
         res = self.client.get(url)
         
         serializer = RecipeDetailSerializer(recipe)
+
+    def test_create_recipe_successful(self):
+        payload = {
+            'title' : 'testtag',
+            'time_min': 2,
+            'price': 5.00
+        }
+        res = self.client.post(RECIPE_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id = res.data['id'])
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(recipe, key))
+
+    def test_create_recipe_with_tags(self):
+        tag1 = sample_tag(self.user, name='dessert')
+        tag2 = sample_tag(self.user, name='dish')
+        payload = {
+            'title' : 'avecado',
+            'time_min': 2,
+            'price': 5.00,
+            'tags': [tag1.id, tag2.id]
+        }
+
+        res = self.client.post(RECIPE_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id = res.data['id'])
+        tag = Tag.objects.all()
+        self.assertEqual(tag.count(), 2)
+        self.assertIn(tag1, tag)
+        self.assertIn(tag2, tag)
+
+    def test_create_recipe_with_ingrediant(self):
+        ingrediant1 = sample_ingrediant(self.user, name='dessert')
+        ingrediant2 = sample_ingrediant(self.user, name='dish')
+        payload = {
+            'title' : 'clust',
+            'time_min': 20,
+            'price': 5.00,
+            'ingrediant': [ingrediant1.id, ingrediant2.id]
+        }
+
+        res = self.client.post(RECIPE_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id = res.data['id'])
+        ingrediant = Ingredient.objects.all()
+        self.assertEqual(ingrediant.count(), 2)
+        self.assertIn(ingrediant1, ingrediant)
+        self.assertIn(ingrediant2, ingrediant)
